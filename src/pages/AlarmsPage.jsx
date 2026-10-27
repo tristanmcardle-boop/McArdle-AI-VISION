@@ -1,35 +1,33 @@
-import { mockEvents } from '../data/mockData';
+import { mockAlarms } from '../data/mockData';
 
-export default function PlaybackPage() {
+export default function AlarmsPage() {
   return (
     <div className="content-stack">
       <section className="page-header">
         <div>
-          <p className="eyebrow">Evidence review</p>
-          <h2>Playback</h2>
+          <p className="eyebrow">Response and verification</p>
+          <h2>Alarm handling</h2>
         </div>
       </section>
 
-      <div className="panel playback-panel">
-        <div className="playback-video" />
-        <div className="timeline">
-          <div className="timeline-track">
-            <div className="timeline-progress" />
-          </div>
-        </div>
-      </div>
-
       <div className="panel">
-        <h3>Recent incidents</h3>
-        <div className="incident-list">
-          {mockEvents.slice(0, 5).map((event) => (
-            <div key={event.id} className="incident-item">
-              <span>{event.time}</span>
-              <strong>{event.camera}</strong>
-              <span>{event.event}</span>
+        {mockAlarms.map((alarm) => (
+          <div key={alarm.id} className={`sop-card ${alarm.status.toLowerCase()}`}>
+            <div className="sop-top">
+              <div>
+                <strong>#{alarm.id} {alarm.type}</strong>
+                <p>{alarm.location}</p>
+              </div>
+              <span>{alarm.status}</span>
             </div>
-          ))}
-        </div>
+
+            <ul>
+              {alarm.sop.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );

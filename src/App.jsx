@@ -61,7 +61,11 @@ function Shell() {
 
         <nav className="nav">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
               {item.label}
             </NavLink>
           ))}
