@@ -1,464 +1,270 @@
-* { box-sizing: border-box; }
-html, body, #root {
-  margin: 0;
-  min-height: 100%;
-  height: 100%;
-  font-family: Inter, 'Segoe UI', sans-serif;
-  background: #f3f6fb;
-  color: #15212f;
-}
-body {
-  background: linear-gradient(180deg, #f3f6fb 0%, #eaf0f7 100%);
-}
-button, input, select {
-  font: inherit;
-}
-button {
-  cursor: pointer;
+import { useMemo, useState } from 'react';
+import { deviceTypes, mockDevices } from '../data/mockData';
+
+const categoryTabs = ['All', ...deviceTypes];
+
+function isValidIp(value) {
+  return /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/.test(value.trim());
 }
 
-.topbar {
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 24px;
-  background: rgba(22, 33, 46, 0.98);
-  color: #edf3ff;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  z-index: 10;
-}
-.brand-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-}
-.brand-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #43d98a;
-  box-shadow: 0 0 12px rgba(67, 217, 138, 0.8);
-}
-.brand-dot.large {
-  width: 18px;
-  height: 18px;
-}
-.nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.nav-link {
-  text-decoration: none;
-  color: #dfe8f7;
-  padding: 8px 12px;
-  border-radius: 10px;
-  transition: 0.2s ease;
-}
-.nav-link.active,
-.nav-link:hover {
-  background: rgba(255,255,255,0.08);
-}
-.account-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.ghost-btn,
-.primary-btn,
-.secondary-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-weight: 600;
-}
-.ghost-btn {
-  background: rgba(255,255,255,0.08);
-  color: #edf3ff;
-}
-.primary-btn {
-  background: linear-gradient(135deg, #2c74ff, #1f7ae0);
-  color: white;
-  box-shadow: 0 10px 22px rgba(31,122,224,0.28);
-}
-.secondary-btn {
-  background: #ebf2ff;
-  color: #1d4fc8;
+function getPortForType(type) {
+  const portMap = {
+    Camera: 554,
+    Speaker: 80,
+    Intercom: 443,
+    Alarm: 502,
+    'Access Controller': 80,
+    NVR: 554,
+    Gateway: 80
+  };
+
+  return portMap[type] || 80;
 }
 
-.page-shell {
-  padding: 24px;
-}
-.content-stack {
-  max-width: 1300px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.page-header h2 {
-  margin: 4px 0 0;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-}
-.eyebrow {
-  margin: 0;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #5f7186;
+function simulateReachability(ip, type) {
+  const digits = ip.split('.').map(Number);
+  const total = digits.reduce((sum, value) => sum + value, 0);
+  const base = (total + type.length) % 10;
+  return base <= 6;
 }
 
-.stats-grid,
-.analytics-grid,
-.admin-grid,
-.two-col-layout,
-.device-summary-grid {
-  display: grid;
-  gap: 20px;
-}
-.stats-grid,
-.device-summary-grid {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-.analytics-grid,
-.admin-grid,
-.two-col-layout {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-.stat-card,
-.panel {
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(122,139,163,0.18);
-  border-radius: 18px;
-  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.06);
-}
-.stat-card {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.stat-card.compact {
-  padding: 18px 20px;
-}
-.stat-label {
-  font-size: 0.8rem;
-  color: #63758c;
-}
-.stat-card strong {
-  font-size: 2rem;
-}
-.stat-card small {
-  color: #2a8a58;
-}
+export default function CamerasPage() {
+  const [devices, setDevices] = useState(mockDevices);
+  const [activeType, setActiveType] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [form, setForm] = useState({
+    name: '',
+    type: 'Camera',
+    ip: '',
+    model: '',
+    username: '',
+    password: '',
+    notes: ''
+  });
+  const [statusMessage, setStatusMessage] = useState('');
 
-.panel {
-  padding: 18px 20px;
-}
-.panel h3 {
-  margin-top: 0;
-  margin-bottom: 18px;
-}
-.camera-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-}
-.mini-feed {
-  background: linear-gradient(180deg, #161f2d, #0d1520);
-  border-radius: 14px;
-  padding: 10px;
-  min-height: 160px;
-}
-.feed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.82rem;
-  color: #edf3ff;
-  margin-bottom: 10px;
-}
-.status {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 7px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-.status.online {
-  background: rgba(67, 217, 138, 0.18);
-  color: #1b8a59;
-}
-.status.offline {
-  background: rgba(238, 95, 95, 0.15);
-  color: #b33e3e;
-}
-.feed-sim {
-  height: 110px;
-  border-radius: 12px;
-  background:
-    linear-gradient(180deg, rgba(97,122,155,0.15), rgba(97,122,155,0.02)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,0.08),
-      rgba(255,255,255,0.08) 1px,
-      transparent 1px,
-      transparent 18px
+  const filteredDevices = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return devices.filter((device) => {
+      const matchesType = activeType === 'All' || device.type === activeType;
+      const matchesQuery =
+        !query ||
+        device.name.toLowerCase().includes(query) ||
+        device.ip.toLowerCase().includes(query) ||
+        device.model.toLowerCase().includes(query) ||
+        device.notes.toLowerCase().includes(query);
+      const matchesStatus = statusFilter === 'All' || device.status === statusFilter;
+      return matchesType && matchesQuery && matchesStatus;
+    });
+  }, [devices, activeType, searchTerm, statusFilter]);
+
+  const summary = useMemo(() => {
+    const total = devices.length;
+    const online = devices.filter((device) => device.status === 'Online').length;
+    const types = deviceTypes.map((type) => ({
+      type,
+      count: devices.filter((device) => device.type === type).length
+    }));
+
+    return { total, online, types };
+  }, [devices]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleAddDevice = () => {
+    const trimmed = {
+      name: form.name.trim() || 'New device',
+      type: form.type,
+      ip: form.ip.trim() || '192.168.1.10',
+      model: form.model.trim() || 'Generic device',
+      username: form.username.trim() || 'admin',
+      password: form.password.trim() || 'password',
+      notes: form.notes.trim() || 'Awaiting status check'
+    };
+
+    const nextDevice = {
+      id: Date.now(),
+      ...trimmed,
+      status: isValidIp(trimmed.ip) && simulateReachability(trimmed.ip, trimmed.type) ? 'Online' : 'Offline'
+    };
+
+    setDevices((current) => [nextDevice, ...current]);
+    setForm({ name: '', type: 'Camera', ip: '', model: '', username: '', password: '', notes: '' });
+    setStatusMessage(`Added ${trimmed.name} at ${trimmed.ip}`);
+    setActiveType('All');
+  };
+
+  const handleTestConnection = (device) => {
+    const reachable = simulateReachability(device.ip, device.type);
+    const port = getPortForType(device.type);
+
+    setDevices((current) =>
+      current.map((item) =>
+        item.id === device.id
+          ? {
+              ...item,
+              status: reachable ? 'Online' : 'Offline',
+              port,
+              health: {
+                ping: reachable ? 'reachable' : 'timeout',
+                port: reachable ? `TCP ${port} open` : `TCP ${port} closed`
+              }
+            }
+          : item
+      )
     );
-  border: 1px solid rgba(255,255,255,0.08);
-}
 
-.alarm-list,
-.incident-list,
-.settings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.alarm-item,
-.incident-item,
-.sop-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(122,139,163,0.15);
-  background: #f7f9fc;
-}
-.alarm-item p,
-.sop-card p {
-  margin: 4px 0 0;
-  color: #5f7186;
-}
-.alarm-item.new { border-left: 4px solid #efb244; }
-.alarm-item.handling { border-left: 4px solid #3d8dff; }
-.alarm-item.cleared { border-left: 4px solid #2fbf71; opacity: 0.75; }
+    setStatusMessage(`${device.name}: ping ${reachable ? 'OK' : 'failed'}, TCP ${port} ${reachable ? 'open' : 'closed'}`);
+  };
 
-.table-wrap {
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  text-align: left;
-  padding: 12px 10px;
-  border-bottom: 1px solid rgba(122,139,163,0.15);
-}
-th {
-  color: #5c6d84;
-  font-weight: 700;
-}
+  return (
+    <div className="content-stack">
+      <section className="page-header">
+        <div>
+          <p className="eyebrow">Network device management</p>
+          <h2>Cameras and devices</h2>
+        </div>
+      </section>
 
-.auth-screen {
-  min-height: calc(100vh - 80px);
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-.auth-panel {
-  width: min(100%, 420px);
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(112,129,151,0.15);
-  border-radius: 20px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
-  padding: 30px 28px;
-}
-.brand-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.auth-panel h1 {
-  margin: 0;
-  font-size: 2rem;
-}
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.auth-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-weight: 600;
-  color: #31435a;
-}
-.auth-form input,
-.device-form-grid input,
-.device-form-grid select {
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(122,139,163,0.25);
-  background: #f7f9fc;
-}
+      <div className="device-summary-grid">
+        <div className="stat-card compact">
+          <span className="stat-label">Total devices</span>
+          <strong>{summary.total}</strong>
+        </div>
+        <div className="stat-card compact">
+          <span className="stat-label">Reachable</span>
+          <strong>{summary.online}</strong>
+        </div>
+        {summary.types.map((entry) => (
+          <div key={entry.type} className="stat-card compact">
+            <span className="stat-label">{entry.type}</span>
+            <strong>{entry.count}</strong>
+          </div>
+        ))}
+      </div>
 
-.chart-bars {
-  height: 220px;
-  display: flex;
-  align-items: end;
-  gap: 14px;
-  padding-top: 20px;
-}
-.bar-wrap {
-  flex: 1;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  height: 100%;
-}
-.bar {
-  width: 100%;
-  max-width: 42px;
-  border-radius: 12px 12px 0 0;
-  background: linear-gradient(180deg, #6da4ff 0%, #2a7af6 100%);
-}
-.legend-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  color: #2d3a4d;
-}
-.legend-list > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.legend-dot {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-.legend-dot.red { background: #ef5f5f; }
-.legend-dot.blue { background: #2d7ff9; }
-.legend-dot.amber { background: #f0b24a; }
-.legend-dot.green { background: #2bb673; }
+      <div className="panel add-device-panel">
+        <h3>Add device by IP</h3>
+        <div className="device-form-grid">
+          <label>
+            Device name
+            <input name="name" value={form.name} onChange={handleChange} placeholder="Main Gate Camera" />
+          </label>
+          <label>
+            Type
+            <select name="type" value={form.type} onChange={handleChange}>
+              {deviceTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            IP address
+            <input name="ip" value={form.ip} onChange={handleChange} placeholder="192.168.1.30" />
+          </label>
+          <label>
+            Model
+            <input name="model" value={form.model} onChange={handleChange} placeholder="Hikvision DS-2CD" />
+          </label>
+          <label>
+            Username
+            <input name="username" value={form.username} onChange={handleChange} placeholder="admin" />
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="password" />
+          </label>
+          <label className="full-width">
+            Notes
+            <input name="notes" value={form.notes} onChange={handleChange} placeholder="Access point, security zone, or site notes" />
+          </label>
+        </div>
+        <div className="form-actions">
+          <button className="primary-btn" onClick={handleAddDevice}>Add device</button>
+          {statusMessage && <span className="status-message">{statusMessage}</span>}
+        </div>
+      </div>
 
-.playback-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.playback-video {
-  height: 280px;
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(18,30,48,0.8), rgba(10,15,21,0.95)),
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.08) 1px, transparent 1px, transparent 18px);
-  border: 1px solid rgba(122,139,163,0.18);
-}
-.timeline {
-  display: flex;
-  align-items: center;
-}
-.timeline-track {
-  position: relative;
-  width: 100%;
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(122,139,163,0.15);
-  overflow: hidden;
-}
-.timeline-progress {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 46%;
-  background: linear-gradient(90deg, #2d7ff9, #7db2ff);
-  border-radius: inherit;
-}
-.incident-item {
-  justify-content: flex-start;
-}
-.incident-item span,
-.incident-item strong {
-  flex: 1;
-}
+      <div className="panel device-table-panel">
+        <div className="filter-row">
+          <div className="tab-group">
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab}
+                className={`tab-button ${activeType === tab ? 'active' : ''}`}
+                onClick={() => setActiveType(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-.sop-card {
-  display: block;
-  margin-bottom: 12px;
-}
-.sop-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.sop-card ul {
-  margin: 0;
-  padding-left: 20px;
-  color: #374b62;
-}
-.sop-card.new { border-left: 4px solid #efb244; }
-.sop-card.handling { border-left: 4px solid #3d8dff; }
-.sop-card.cleared { border-left: 4px solid #2fbf71; opacity: 0.8; }
-.settings-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.settings-list li {
-  background: #f4f7fc;
-  border: 1px solid rgba(122,139,163,0.12);
-  padding: 10px 12px;
-  border-radius: 10px;
-}
+          <div className="filter-controls">
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by name, IP, model, or note"
+            />
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="All">All status</option>
+              <option value="Online">Online</option>
+              <option value="Offline">Offline</option>
+            </select>
+          </div>
+        </div>
 
-.device-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-.device-form-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: #354864;
-  font-weight: 600;
-}
-.full-width {
-  grid-column: 1 / -1;
-}
-.form-actions {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.status-message {
-  color: #2d7ff9;
-  font-size: 0.92rem;
-}
-
-@media (max-width: 720px) {
-  .topbar {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .page-shell {
-    padding: 16px;
-  }
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>IP</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Health</th>
+                <th>Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredDevices.map((device) => (
+                <tr key={device.id}>
+                  <td>{device.name}</td>
+                  <td>{device.type}</td>
+                  <td>{device.ip}</td>
+                  <td>{device.model}</td>
+                  <td>
+                    <span className={`status ${device.status === 'Online' ? 'online' : 'offline'}`}>
+                      {device.status}
+                    </span>
+                  </td>
+                  <td>
+                    {device.health ? (
+                      <div className="health-cell">
+                        <span>{device.health.ping}</span>
+                        <small>{device.health.port}</small>
+                      </div>
+                    ) : (
+                      <small>Not tested</small>
+                    )}
+                  </td>
+                  <td>{device.notes}</td>
+                  <td>
+                    <button className="secondary-btn" onClick={() => handleTestConnection(device)}>
+                      Test
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
