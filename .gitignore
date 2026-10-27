@@ -1,0 +1,25 @@
+# McArdle AI VMS
+
+A production-style React + Vite monitoring dashboard for AI vision operations.
+
+## Features
+- Secure operator login flow
+- Multi-page dashboard layout
+- Camera fleet management
+- Analytics and playback views
+- Alarm handling workflow
+- Admin configuration page
+- SPA routing and offline cache support (via service worker)
+
+## Getting started
+
+1. Install dependencies:
+   npm install
+2. Start the app:
+   npm run dev
+3. Build for production:
+   npm run build
+
+## Deployment
+This app is ready for static hosting targets like Vercel, Netlify, or GitHub Pages.
+For Vercel or Netlify, use the default build command from Vite (`npm run build`).
