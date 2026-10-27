@@ -5,6 +5,15 @@ export const mockCameras = [
   { id: 104, name: 'Perimeter East', location: 'Boundary fence', brand: 'Uniview', analytics: ['Line crossing', 'Track', 'Motion'] }
 ];
 
+export const deviceTypes = ['Camera', 'Speaker', 'Intercom', 'Alarm', 'Access Controller', 'NVR', 'Gateway'];
+
+export const mockDevices = [
+  { id: 1, name: 'Front Gate Camera', type: 'Camera', ip: '192.168.1.21', model: 'Hikvision DS-2CD2142FWD-I', status: 'Online', username: 'admin', password: '••••••', notes: 'Main gate monitoring' },
+  { id: 2, name: 'Lobby Speaker', type: 'Speaker', ip: '192.168.1.42', model: 'Axis Speaker', status: 'Online', username: 'admin', password: '••••••', notes: 'Site announcement' },
+  { id: 3, name: 'Reception Intercom', type: 'Intercom', ip: '192.168.1.67', model: 'Aiphone', status: 'Offline', username: 'service', password: '••••••', notes: 'Visitor entry check' },
+  { id: 4, name: 'Perimeter Alarm', type: 'Alarm', ip: '192.168.1.89', model: 'Bosch B4512', status: 'Online', username: 'bosch', password: '••••••', notes: 'Fence alarm panel' }
+];
+
 export const mockEvents = [
   { id: 1, time: '08:14:22', camera: 'Front Gate', event: 'Line crossing', result: 'Verified' },
   { id: 2, time: '08:32:10', camera: 'Car Park', event: 'Speed alert', result: 'Escalated' },

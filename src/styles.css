@@ -10,7 +10,7 @@ html, body, #root {
 body {
   background: linear-gradient(180deg, #f3f6fb 0%, #eaf0f7 100%);
 }
-button, input {
+button, input, select {
   font: inherit;
 }
 button {
@@ -70,7 +70,8 @@ button {
   gap: 12px;
 }
 .ghost-btn,
-.primary-btn {
+.primary-btn,
+.secondary-btn {
   border: none;
   border-radius: 10px;
   padding: 10px 16px;
@@ -84,6 +85,10 @@ button {
   background: linear-gradient(135deg, #2c74ff, #1f7ae0);
   color: white;
   box-shadow: 0 10px 22px rgba(31,122,224,0.28);
+}
+.secondary-btn {
+  background: #ebf2ff;
+  color: #1d4fc8;
 }
 
 .page-shell {
@@ -117,11 +122,13 @@ button {
 .stats-grid,
 .analytics-grid,
 .admin-grid,
-.two-col-layout {
+.two-col-layout,
+.device-summary-grid {
   display: grid;
   gap: 20px;
 }
-.stats-grid {
+.stats-grid,
+.device-summary-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 .analytics-grid,
@@ -141,6 +148,9 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.stat-card.compact {
+  padding: 18px 20px;
 }
 .stat-label {
   font-size: 0.8rem;
@@ -190,6 +200,10 @@ button {
 .status.online {
   background: rgba(67, 217, 138, 0.18);
   color: #1b8a59;
+}
+.status.offline {
+  background: rgba(238, 95, 95, 0.15);
+  color: #b33e3e;
 }
 .feed-sim {
   height: 110px;
@@ -287,7 +301,9 @@ th {
   font-weight: 600;
   color: #31435a;
 }
-.auth-form input {
+.auth-form input,
+.device-form-grid input,
+.device-form-grid select {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid rgba(122,139,163,0.25);
@@ -404,6 +420,33 @@ th {
   border: 1px solid rgba(122,139,163,0.12);
   padding: 10px 12px;
   border-radius: 10px;
+}
+
+.device-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.device-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #354864;
+  font-weight: 600;
+}
+.full-width {
+  grid-column: 1 / -1;
+}
+.form-actions {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.status-message {
+  color: #2d7ff9;
+  font-size: 0.92rem;
 }
 
 @media (max-width: 720px) {
