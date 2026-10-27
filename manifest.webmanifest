@@ -1,0 +1,10 @@
+{
+  "name": "McArdle AI VMS",
+  "short_name": "McArdle VMS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eef1f4",
+  "theme_color": "#1f7ae0",
+  "description": "AI vision monitoring and alarm dashboard",
+  "icons": []
+}
